@@ -1,9 +1,24 @@
 require 'bundler/setup'
 require 'rmagick'
 
-img1 = Magick::Image.read('images/sample1.png').first
-img2 = Magick::Image.read('images/sample2.png').first
+class ImageDiff
+  attr_reader :img1, :img2
 
-img1.compare_channel(img2, Magick::MeanSquaredErrorMetric)[0].write('diff_images/sample_diff_1.png')
-img1.composite(img2,Magick::NorthWestGravity,Magick::DifferenceCompositeOp).write('diff_images/sample_diff_2.png')
+  def initialize(file1, file2)
+    @img1 = Magick::Image.read(file1).first
+    @img2 = Magick::Image.read(file2).first
+  end
+
+  def save(path)
+    exec.write(path)
+  end
+
+  private
+  def exec
+    img1.compare_channel(img2, Magick::MeanSquaredErrorMetric).first
+  end
+end
+
+image = ImageDiff.new('images/sample1.png','images/sample2.png')
+image.save('diff_images/sample_diff_1.png')
 
